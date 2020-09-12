@@ -2,6 +2,7 @@ module Control.Window.List
   ( window2
   , window3
   , windowN
+  , stateMachine2
   ) where
 
 -- TODO more data types can be included (more optimally) in `Control.Window.{Array,Text,...}`
@@ -49,3 +50,17 @@ windowN n editor xs
   = case editor window of
       Nothing -> head window : windowN n editor (tail window ++ rest)
       Just xs' -> windowN n editor (xs' ++ rest)
+
+
+stateMachine2 ::
+     (st -> a -> a -> Maybe ([a], st))
+  -> st
+  -> [a]
+  -> [a]
+stateMachine2 edit st0 xs0 = go st0 xs0
+  where
+  go _ [] = []
+  go _ [x] = [x]
+  go st (x:y:rest) = case edit st x y of
+    Nothing -> x : go st (y:rest)
+    Just (xs', st') -> go st' (xs' ++ rest)
