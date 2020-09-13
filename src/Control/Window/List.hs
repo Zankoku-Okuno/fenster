@@ -2,6 +2,7 @@ module Control.Window.List
   ( window2
   , window3
   , windowN
+  , stateMachine1
   , stateMachine2
   ) where
 
@@ -52,8 +53,21 @@ windowN n editor xs
       Just xs' -> windowN n editor (xs' ++ rest)
 
 
+stateMachine1 ::
+     (st -> a -> Maybe (st, [a]))
+  -> st
+  -> [a]
+  -> [a]
+stateMachine1 edit st0 xs0 = go st0 xs0
+  where
+  go _ [] = []
+  go st (x:rest) = case edit st x of
+    Nothing -> x : go st rest
+    Just (st', xs') -> go st' (xs' ++ rest)
+
+
 stateMachine2 ::
-     (st -> a -> a -> Maybe ([a], st))
+     (st -> a -> a -> Maybe (st, [a]))
   -> st
   -> [a]
   -> [a]
@@ -63,4 +77,4 @@ stateMachine2 edit st0 xs0 = go st0 xs0
   go _ [x] = [x]
   go st (x:y:rest) = case edit st x y of
     Nothing -> x : go st (y:rest)
-    Just (xs', st') -> go st' (xs' ++ rest)
+    Just (st', xs') -> go st' (xs' ++ rest)
